@@ -75,13 +75,13 @@ int main(void) {
 
     /* exp variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
-    t0 = clock(); split_radix_exp_fft(a, NULL, MAXN); t1 = clock();
+    t0 = clock(); split_radix_exp_fft_inout(a, MAXN); t1 = clock();
     exp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
     printf("  %-20s %10.3f ms\n", "exp twiddle", exp_ms);
 
     /* sin/cos variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
-    t0 = clock(); split_radix_sincos_fft(a, MAXN); t1 = clock();
+    t0 = clock(); split_radix_sincos_fft_inout(a, MAXN); t1 = clock();
     sincos_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
     printf("  %-20s %10.3f ms\n", "sin/cos twiddle", sincos_ms);
     printf("  -> sin/cos speedup: %5.1fx\n", exp_ms / sincos_ms);
