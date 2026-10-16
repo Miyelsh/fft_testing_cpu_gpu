@@ -1,0 +1,10 @@
+# Compiled binaries / build outputs
+/fft_compare_all
+/fft_compare_all_n_sweep
+/fft_gpu
+*.o
+*.so
+*.a
+
+# Local agent instructions (not tracked)
+/AGENTS.md
