@@ -11,8 +11,8 @@
 int main(void) {
     printf("=== N sweep: split-radix + sincos round-trip ===\n\n");
 
-    /* --- split_radix_cexp_fft_inout + split_radix_cexp_ifft_inout --- */
-    printf("[split_radix_cexp_fft_inout + split_radix_cexp_ifft_inout]\n");
+    /* --- split_radix_exp_fft_inout + split_radix_exp_ifft_inout --- */
+    printf("[split_radix_exp_fft_inout + split_radix_exp_ifft_inout]\n");
     int sizes[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384};
     int n_sizes = 15;
     int failures = 0;
@@ -24,15 +24,15 @@ int main(void) {
         srand(12345);
         for (int i = 0; i < n; i++) {
             orig[i] = std::complex<double>(
-                ((double)rand() / RAND_MAX - 0.5) * 2.0 * RNG_MAX,
-                0.0
-            );
+                    ((double)rand() / RAND_MAX - 0.5) * 2.0 * RNG_MAX,
+                    0.0
+                    );
             copy[i] = orig[i];
         }
 
         clock_t t0 = clock();
-        split_radix_cexp_fft_inout(copy, n);
-        split_radix_cexp_ifft_inout(copy, n);
+        split_radix_exp_fft_inout(copy, n);
+        split_radix_exp_ifft_inout(copy, n);
         clock_t t1 = clock();
 
         double err = 0;
@@ -60,9 +60,9 @@ int main(void) {
         srand(12345);
         for (int i = 0; i < n; i++) {
             orig[i] = std::complex<double>(
-                ((double)rand() / RAND_MAX - 0.5) * 2.0 * RNG_MAX,
-                0.0
-            );
+                    ((double)rand() / RAND_MAX - 0.5) * 2.0 * RNG_MAX,
+                    0.0
+                    );
             copy[i] = orig[i];
         }
 

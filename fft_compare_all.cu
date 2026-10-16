@@ -31,8 +31,8 @@ int main(void) {
 
     /* --- CPU FFT+IFFT round-trip --- */
     printf("[CPU] FFT + IFFT (round-trip):\n");
-    split_radix_cexp_fft_inout(a, MAXN);
-    split_radix_cexp_ifft_inout(a, MAXN);
+    split_radix_exp_fft_inout(a, MAXN);
+    split_radix_exp_ifft_inout(a, MAXN);
     double max_err_cpu = 0;
     for (int i = 0; i < MAXN; i++) {
         double e = hypot(a[i].real() - a_orig[i].real(), a[i].imag() - a_orig[i].imag());
@@ -57,8 +57,8 @@ int main(void) {
         );
         s_orig[i] = s[i];
     }
-    split_radix_cexp_fft_inout(s, N_small);
-    split_radix_cexp_ifft_inout(s, N_small);
+    split_radix_exp_fft_inout(s, N_small);
+    split_radix_exp_ifft_inout(s, N_small);
     double max_err_256 = 0;
     for (int i = 0; i < N_small; i++) {
         double e = hypot(s[i].real() - s_orig[i].real(), s[i].imag() - s_orig[i].imag());
@@ -66,25 +66,25 @@ int main(void) {
     }
     printf("[CPU] N=256 round-trip max error: %.2e  %s\n", max_err_256, max_err_256 < 1e-12 ? "PASS" : "FAIL");
 
-    /* --- cexp vs sin/cos benchmark --- */
+    /* --- exp vs sin/cos benchmark --- */
     std::complex<double> *orig = (std::complex<double>*)malloc(MAXN * sizeof(std::complex<double>));
     for (int i = 0; i < MAXN; i++) orig[i] = a_orig[i];
 
     clock_t t0, t1;
-    double cexp_ms, sincos_ms;
+    double exp_ms, sincos_ms;
 
-    /* cexp variant */
+    /* exp variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
-    t0 = clock(); split_radix_cexp_fft(a, NULL, MAXN); t1 = clock();
-    cexp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
-    printf("  %-20s %10.3f ms\n", "cexp twiddle", cexp_ms);
+    t0 = clock(); split_radix_exp_fft(a, NULL, MAXN); t1 = clock();
+    exp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
+    printf("  %-20s %10.3f ms\n", "exp twiddle", exp_ms);
 
     /* sin/cos variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
     t0 = clock(); split_radix_sincos_fft(a, MAXN); t1 = clock();
     sincos_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
     printf("  %-20s %10.3f ms\n", "sin/cos twiddle", sincos_ms);
-    printf("  -> sin/cos speedup: %5.1fx\n", cexp_ms / sincos_ms);
+    printf("  -> sin/cos speedup: %5.1fx\n", exp_ms / sincos_ms);
 
     free(orig);
     free(a); free(a_orig); free(s); free(s_orig);
