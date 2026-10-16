@@ -4,5 +4,8 @@
 *.so
 *.a
 
+# Generated Doxygen documentation
+/doxygen/
+
 # Local agent instructions (not tracked)
 /AGENTS.md

@@ -1,0 +1,36 @@
+# Doxygen configuration for qwen_fft_testing
+
+PROJECT_NAME           = "qwen_fft_testing"
+PROJECT_BRIEF          = "Split-radix DIT FFT (CPU) + hipFFT (GPU) with round-trip verification"
+PROJECT_NUMBER         =
+OUTPUT_DIRECTORY       = doxygen
+CREATE_SUBDIRS         = NO
+
+# Sources
+INPUT                  = split_radix_fft_cpu.cpp fft_compare_all_n_sweep.cpp fft_compare_all.cu fft_gpu.cu fft_gpu_test.cu
+FILE_PATTERNS          = *.cpp *.cu
+EXTENSION_MAPPING      = cu=C++
+RECURSIVE              = NO
+
+# Extraction
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_PACKAGE        = NO
+
+# Documentation
+JAVADOC_AUTOBRIEF      = YES
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+
+# Graphviz is not installed here, so skip include/dependency graphs.
+HAVE_DOT               = NO
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_MAN           = YES
+MAN_OUTPUT             = man
+GENERATE_LATEX         = NO
+
+# Look & feel
+GENERATE_TREEVIEW      = YES
+USE_HTAGS              = NO
