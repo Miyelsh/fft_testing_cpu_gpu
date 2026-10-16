@@ -50,8 +50,8 @@ int main(void) {
     hipfftComplex *d2h = (hipfftComplex*)malloc(N * sizeof(hipfftComplex));
     check_hip(hipMemcpy(d2h, d_in, N * sizeof(hipfftComplex), hipMemcpyDeviceToHost), "memcpy D2H");
     for (int i = 0; i < N; i++) {
-        double r, im;
-        from_hip(d2h[i], &r, &im);
+        double r = d2h[i].x / (float)N;
+        double im = d2h[i].y / (float)N;
         h_out[i] = std::complex<double>(r, im);
     }
     free(d2h);
@@ -64,8 +64,8 @@ int main(void) {
     printf("GPU IFFT(FFT(x)) error: %.2e\n", max_err);
 
     hipfftDestroy(plan);
-    hipFree(d_in);
-    hipFree(d_out);
+    check_hip(hipFree(d_in), "hipFree d_in");
+    check_hip(hipFree(d_out), "hipFree d_out");
     free(h_in);
     free(h_out);
     return 0;
