@@ -2,6 +2,8 @@ WORKDIR  := work
 ROCMLIB  := /opt/rocm/core-10.1
 HIPCC    := hipcc
 CXX      := g++
+DOXYGEN  := doxygen
+DOXYOUT  := doxygen
 
 CPU_CXXFLAGS := -std=c++17 -O3 -march=native -ffast-math
 CPU_LDLIBS   := -lm
@@ -12,7 +14,7 @@ BINARIES := $(WORKDIR)/fft_compare_all \
             $(WORKDIR)/fft_compare_all_n_sweep \
             $(WORKDIR)/fft_gpu
 
-.PHONY: all run clean
+.PHONY: all run clean doxygen
 
 all: $(BINARIES)
 
@@ -33,5 +35,9 @@ run: all
 	LD_LIBRARY_PATH=$(ROCMLIB)/lib $(WORKDIR)/fft_compare_all_n_sweep
 	LD_LIBRARY_PATH=$(ROCMLIB)/lib $(WORKDIR)/fft_gpu
 
+doxygen:
+	rm -rf $(DOXYOUT)
+	$(DOXYGEN) Doxyfile
+
 clean:
-	rm -rf $(WORKDIR)
+	rm -rf $(WORKDIR) $(DOXYOUT)
