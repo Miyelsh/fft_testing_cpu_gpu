@@ -1,7 +1,5 @@
 # Compiled binaries / build outputs
-/fft_compare_all
-/fft_compare_all_n_sweep
-/fft_gpu
+/work/
 *.o
 *.so
 *.a
