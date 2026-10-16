@@ -1,6 +1,3 @@
-#ifndef FFT_SPLIT_RADIX_H
-#define FFT_SPLIT_RADIX_H
-
 #include <cmath>
 #include <complex>
 #include <cstdlib>
@@ -57,47 +54,6 @@ void split_radix_exp_fft(std::complex<double> *in, std::complex<double> *out, in
         dest[k + 3 * n / 4] = e[k + n / 4] + wn6 * t2[k];
     }
     free(e); free(o1); free(o2); free(t1); free(t2); free(w);
-}
-
-void split_radix_exp_fft_inout(std::complex<double> *inout, int n) {
-    std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
-    memcpy(b, inout, n * sizeof(std::complex<double>));
-    split_radix_exp_fft(b, inout, n);
-    free(b);
-}
-
-void split_radix_exp_ifft_inout(std::complex<double> *inout, int n) {
-    std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
-    for (int i = 0; i < n; i++) {
-        b[i] = std::conj(inout[i]);
-    }
-    split_radix_exp_fft(b, NULL, n);
-    for (int i = 0; i < n; i++) {
-        inout[i] = std::conj(b[i]) / (double)n;
-    }
-    free(b);
-}
-
-void split_radix_sincos_fft(std::complex<double> *a, int n);
-
-void split_radix_sincos_ifft_inout(std::complex<double> *inout, int n) {
-    std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
-    for (int i = 0; i < n; i++) {
-        b[i] = std::conj(inout[i]);
-    }
-    split_radix_sincos_fft(b, n);
-    for (int i = 0; i < n; i++) {
-        inout[i] = std::conj(b[i]) / (double)n;
-    }
-    free(b);
-}
-
-void split_radix_sincos_fft_inout(std::complex<double> *inout, int n) {
-    std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
-    memcpy(b, inout, n * sizeof(std::complex<double>));
-    split_radix_sincos_fft(b, n);
-    memcpy(inout, b, n * sizeof(std::complex<double>));
-    free(b);
 }
 
 void split_radix_sincos_fft(std::complex<double> *a, int n) {
@@ -191,5 +147,3 @@ void split_radix_sincos_fft_inout(std::complex<double> *inout, int n) {
     memcpy(inout, b, n * sizeof(std::complex<double>));
     free(b);
 }
-
-#endif

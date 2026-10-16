@@ -8,12 +8,21 @@
 #include <ctime>
 #include <float.h>
 
-hipfftComplex to_hip(double r, double im) { hipfftComplex c; c.x=(float)r; c.y=(float)im; return c; }
-void from_hip(hipfftComplex c, double *r, double *im) { *r=(double)c.x; *im=(double)c.y; }
 
-#define PI 3.14159265358979323846
 #define N 16384
 #define RNG_MAX 64.0
+
+hipfftComplex to_hip(double r, double im) {
+    hipfftComplex c;
+    c.x = (float)r;
+    c.y = (float)im;
+    return c;
+}
+
+void from_hip(hipfftComplex c, double *r, double *im) {
+    *r  = (double)c.x;
+    *im = (double)c.y;
+}
 
 void check(hipfftResult_t e, const char *msg) {
     if (e != HIPFFT_SUCCESS) { fprintf(stderr, "%s: %d\n", msg, e); exit(1); }
@@ -35,8 +44,10 @@ int main(void) {
     check_hip(hipMalloc(&d_out, N * sizeof(hipfftComplex)), "hipMalloc d_out");
 
     hipfftComplex *h2d = (hipfftComplex*)malloc(N * sizeof(hipfftComplex));
-    for (int i = 0; i < N; i++)
+
+    for (int i = 0; i < N; i++) {
         h2d[i] = to_hip(h_in[i].real(), h_in[i].imag());
+    }
 
     check_hip(hipMemcpy(d_in, h2d, N * sizeof(hipfftComplex), hipMemcpyHostToDevice), "memcpy H2D");
     free(h2d);
