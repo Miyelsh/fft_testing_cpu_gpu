@@ -12,6 +12,13 @@
 #define N 16384
 #define RNG_MAX 64.0
 
+/**
+ * Convert a double-precision complex sample to a hipFFT float2.
+ *
+ * @param[in] r   Real part.
+ * @param[in] im  Imaginary part.
+ * @return The sample as a hipfftComplex (float precision).
+ */
 hipfftComplex to_hip(double r, double im) {
     hipfftComplex c;
     c.x = (float)r;
@@ -19,18 +26,34 @@ hipfftComplex to_hip(double r, double im) {
     return c;
 }
 
-void from_hip(hipfftComplex c, double *r, double *im) {
-    *r  = (double)c.x;
-    *im = (double)c.y;
-}
-
+/**
+ * Abort the program if a hipFFT call did not succeed.
+ *
+ * @param[in] e    hipFFT result code to check.
+ * @param[in] msg  Label identifying the failing call, printed on failure.
+ */
 void check(hipfftResult_t e, const char *msg) {
     if (e != HIPFFT_SUCCESS) { fprintf(stderr, "%s: %d\n", msg, e); exit(1); }
 }
+/**
+ * Abort the program if a HIP runtime call did not succeed.
+ *
+ * @param[in] e    HIP error code to check.
+ * @param[in] msg  Label identifying the failing call, printed on failure.
+ */
 void check_hip(hipError_t e, const char *msg) {
     if (e != hipSuccess) { fprintf(stderr, "%s: %s\n", msg, hipGetErrorString(e)); exit(1); }
 }
 
+/**
+ * Standalone hipFFT round-trip test.
+ *
+ * Generates a random real signal, runs a forward then inverse hipFFT on the
+ * GPU, divides the inverse by N (hipFFT does not scale the backward
+ * transform), and reports the max error against the original.
+ *
+ * @return 0 on success.
+ */
 int main(void) {
     srand(12345);
 

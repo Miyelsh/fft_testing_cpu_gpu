@@ -15,6 +15,15 @@
 // Include GPU test function from fft_gpu_test.cu
 #include "fft_gpu_test.cu"
 
+/**
+ * Unified CPU + GPU FFT comparison and benchmark at N = MAXN (16384).
+ *
+ * Runs a CPU forward + inverse round-trip, a GPU hipFFT round-trip (via
+ * gpu_fft_test), a small N=256 CPU cross-check, and an exp-vs-sincos timing
+ * benchmark.
+ *
+ * @return Always 0; individual checks are reported via printed PASS/FAIL lines.
+ */
 int main(void) {
     printf("=== FFT compare + benchmark (N=%d) ===\n\n", MAXN);
 

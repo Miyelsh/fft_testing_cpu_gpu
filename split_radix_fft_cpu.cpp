@@ -7,6 +7,17 @@
 #define PI 3.14159265358979323846
 static constexpr std::complex<double> I(0, 1);
 
+/**
+ * Forward split-radix DIT FFT using exponential (polar) twiddles.
+ *
+ * Computes the n-point DFT of the first n elements of in. The even-index
+ * (N/2) and stride-4 odd (two N/4) sub-transforms are combined with the
+ * standard split-radix butterfly.
+ *
+ * @param[in]  in   Input samples; the first n are read.
+ * @param[out] out  Output buffer for the result; pass NULL to compute in-place in in.
+ * @param[in]  n    Transform length; must be a power of 2.
+ */
 void split_radix_exp_fft(std::complex<double> *in, std::complex<double> *out, int n) {
     std::complex<double> *dest = out ? out : in;
     if (n <= 1) return;
@@ -56,6 +67,17 @@ void split_radix_exp_fft(std::complex<double> *in, std::complex<double> *out, in
     free(e); free(o1); free(o2); free(t1); free(t2); free(w);
 }
 
+/**
+ * Forward split-radix DIT FFT using cos/sin twiddles.
+ *
+ * Identical algorithm to split_radix_exp_fft; the only difference is that
+ * twiddle factors are built with cos/sin rather than std::polar. Provides
+ * the "sin/cos" reference used by the exp-vs-sincos benchmark.
+ *
+ * @param[in]  in   Input samples; the first n are read.
+ * @param[out] out  Output buffer for the result; pass NULL to compute in-place in in.
+ * @param[in]  n    Transform length; must be a power of 2.
+ */
 void split_radix_sincos_fft(std::complex<double> *in, std::complex<double> *out, int n) {
     std::complex<double> *dest = out ? out : in;
     if (n <= 1) return;
@@ -108,6 +130,14 @@ void split_radix_sincos_fft(std::complex<double> *in, std::complex<double> *out,
 }
 
 
+/**
+ * In-place forward FFT (exp variant).
+ *
+ * Convenience wrapper that transforms inout in place via split_radix_exp_fft.
+ *
+ * @param[in,out] inout  Samples to transform; result is written back here.
+ * @param[in]     n      Transform length; must be a power of 2.
+ */
 void split_radix_exp_fft_inout(std::complex<double> *inout, int n) {
     std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
     memcpy(b, inout, n * sizeof(std::complex<double>));
@@ -115,6 +145,15 @@ void split_radix_exp_fft_inout(std::complex<double> *inout, int n) {
     free(b);
 }
 
+/**
+ * In-place inverse FFT (exp variant).
+ *
+ * Implements the inverse via the conjugate identity IFFT(x) = conj(FFT(conj(x)))/n,
+ * so it reuses split_radix_exp_fft rather than a dedicated backward kernel.
+ *
+ * @param[in,out] inout  Frequency samples; the time-domain inverse is written back here.
+ * @param[in]     n      Transform length; must be a power of 2.
+ */
 void split_radix_exp_ifft_inout(std::complex<double> *inout, int n) {
     std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
     for (int i = 0; i < n; i++) {
@@ -127,6 +166,14 @@ void split_radix_exp_ifft_inout(std::complex<double> *inout, int n) {
     free(b);
 }
 
+/**
+ * In-place inverse FFT (sin/cos variant).
+ *
+ * Inverse via IFFT(x) = conj(FFT(conj(x)))/n, reusing split_radix_sincos_fft.
+ *
+ * @param[in,out] inout  Frequency samples; the time-domain inverse is written back here.
+ * @param[in]     n      Transform length; must be a power of 2.
+ */
 void split_radix_sincos_ifft_inout(std::complex<double> *inout, int n) {
     std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
     for (int i = 0; i < n; i++) {
@@ -139,6 +186,14 @@ void split_radix_sincos_ifft_inout(std::complex<double> *inout, int n) {
     free(b);
 }
 
+/**
+ * In-place forward FFT (sin/cos variant).
+ *
+ * Convenience wrapper that transforms inout in place via split_radix_sincos_fft.
+ *
+ * @param[in,out] inout  Samples to transform; result is written back here.
+ * @param[in]     n      Transform length; must be a power of 2.
+ */
 void split_radix_sincos_fft_inout(std::complex<double> *inout, int n) {
     std::complex<double> *b = (std::complex<double>*)malloc(n * sizeof(std::complex<double>));
     memcpy(b, inout, n * sizeof(std::complex<double>));

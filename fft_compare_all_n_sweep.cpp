@@ -8,6 +8,16 @@
 #define MAXN 16384
 #define RNG_MAX 64.0
 
+/**
+ * Power-of-2 sweep round-trip test for the CPU FFTs.
+ *
+ * For each n in {1, 2, 4, ..., 16384}, fills a random real signal and runs a
+ * forward + inverse round-trip through both the exp and the sin/cos variants,
+ * reporting the max reconstruction error and a PASS/FAIL against a 1e-8
+ * threshold.
+ *
+ * @return 0 if every round-trip passes, 1 otherwise.
+ */
 int main(void) {
     printf("=== N sweep: split-radix + sincos round-trip ===\n\n");
 

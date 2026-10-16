@@ -26,6 +26,16 @@
     } \
 } while(0)
 
+/**
+ * hipFFT forward + inverse round-trip test helper.
+ *
+ * Generates a random real signal on the host, copies it to the device, runs a
+ * forward then inverse hipFFT, copies the result back, divides by size (hipFFT
+ * does not scale the backward transform), and prints the max reconstruction
+ * error and the transform time.
+ *
+ * @param[in] size  Transform length (number of samples).
+ */
 void gpu_fft_test(int size) {
     hipfftComplex *d_in = nullptr, *d_out = nullptr;
     HIP_CHECK(hipMalloc(&d_in, size * sizeof(hipfftComplex)));
