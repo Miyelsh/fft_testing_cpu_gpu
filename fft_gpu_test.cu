@@ -32,13 +32,15 @@ void gpu_fft_test(int size) {
     HIP_CHECK(hipMalloc(&d_out, size * sizeof(hipfftComplex)));
 
     srand(12345);
+    hipfftComplex *h_in = (hipfftComplex*)malloc(size * sizeof(hipfftComplex));
     for (int i = 0; i < size; i++) {
-        d_in[i].x = ((float)rand()/((float)RAND_MAX) - 0.5f) * 2.0f * RNG_MAX;
-        d_in[i].y = 0.0f;
+        h_in[i].x = ((float)rand()/((float)RAND_MAX) - 0.5f) * 2.0f * RNG_MAX;
+        h_in[i].y = 0.0f;
     }
 
     hipfftComplex *h_orig = (hipfftComplex*)malloc(size * sizeof(hipfftComplex));
-    HIP_CHECK(hipMemcpy(h_orig, d_in, size * sizeof(hipfftComplex), hipMemcpyDeviceToHost));
+    memcpy(h_orig, h_in, size * sizeof(hipfftComplex));
+    HIP_CHECK(hipMemcpy(d_in, h_in, size * sizeof(hipfftComplex), hipMemcpyHostToDevice));
 
     hipfftHandle plan;
     HIPFFT_CHECK(hipfftPlan1d(&plan, size, HIPFFT_C2C, 1));
@@ -50,13 +52,12 @@ void gpu_fft_test(int size) {
     HIP_CHECK(hipDeviceSynchronize());
     clock_t t1 = clock();
 
-    for (int i = 0; i < size; i++) {
-        d_in[i].x /= (float)size;
-        d_in[i].y /= (float)size;
-    }
-
     hipfftComplex *h_ifft = (hipfftComplex*)malloc(size * sizeof(hipfftComplex));
     HIP_CHECK(hipMemcpy(h_ifft, d_in, size * sizeof(hipfftComplex), hipMemcpyDeviceToHost));
+    for (int i = 0; i < size; i++) {
+        h_ifft[i].x /= (float)size;
+        h_ifft[i].y /= (float)size;
+    }
 
     double max_err = 0;
     for (int i = 0; i < size; i++) {
@@ -68,6 +69,7 @@ void gpu_fft_test(int size) {
     double dt = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
     printf("  GPU size=%6d: error=%.2e  time=%.3f ms\n", size, max_err, dt);
 
+    free(h_in);
     free(h_orig);
     free(h_ifft);
     HIP_CHECK(hipFree(d_in));
