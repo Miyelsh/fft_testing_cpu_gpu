@@ -61,7 +61,7 @@ void gpu_fft_test(int size) {
     double max_err = 0;
     for (int i = 0; i < size; i++) {
         double e = hypot((double)h_ifft[i].x - (double)h_orig[i].x,
-                         (double)h_ifft[i].y - (double)h_orig[i].y);
+                (double)h_ifft[i].y - (double)h_orig[i].y);
         max_err = e > max_err ? e : max_err;
     }
 

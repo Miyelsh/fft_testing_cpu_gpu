@@ -9,7 +9,7 @@ Rename files for clarity, merge bench into compare_all, add sincos IFFT, remove 
 | File | Purpose |
 |------|---------|
 | `split_radix_fft_cpu.cpp` | Canonical algorithm (renamed from `fft_split_radix.cpp`) |
-| `fft_compare_all.cu` | N=16384 CPU+GPU round-trip + cexp vs sin/cos benchmark (merged from bench + entry) |
+| `fft_compare_all.cu` | N=16384 CPU+GPU round-trip + exp vs sin/cos benchmark (merged from bench + entry) |
 | `fft_compare_all_n_sweep.cpp` | Power-of-2 sweep N=1…16384, tests split-radix + sincos (renamed from `split_radix_test.cpp`) |
 | `fft_gpu.cu` | GPU hipFFT implementation (unchanged) |
 | `fft_gpu_test.cu` | GPU test function (unchanged) |
@@ -56,25 +56,25 @@ void split_radix_ifft_sincos_inout(std::complex<double> *inout, int n) {
 Current `split_radix_entry.cu` (→ `fft_compare_all.cu`) gains the benchmark section from `split_radix_bench.cpp`:
 
 ```cpp
-    /* --- cexp vs sin/cos benchmark --- */
+    /* --- exp vs sin/cos benchmark --- */
     std::complex<double> *orig = (std::complex<double>*)malloc(MAXN * sizeof(std::complex<double>));
     for (int i = 0; i < MAXN; i++) orig[i] = a_orig[i];
 
     clock_t t0, t1;
-    double cexp_ms, sincos_ms;
+    double exp_ms, sincos_ms;
 
-    /* cexp variant */
+    /* exp variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
     t0 = clock(); split_radix_fft(a, NULL, MAXN); t1 = clock();
-    cexp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
-    printf("  %-20s %10.3f ms\n", "cexp twiddle", cexp_ms);
+    exp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
+    printf("  %-20s %10.3f ms\n", "exp twiddle", exp_ms);
 
     /* sin/cos variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
     t0 = clock(); split_radix_fft_sincos(a, MAXN); t1 = clock();
     sincos_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
     printf("  %-20s %10.3f ms\n", "sin/cos twiddle", sincos_ms);
-    printf("  -> sin/cos speedup: %5.1fx\n", cexp_ms / sincos_ms);
+    printf("  -> sin/cos speedup: %5.1fx\n", exp_ms / sincos_ms);
 
     free(orig);
 ```
@@ -150,25 +150,25 @@ int main(void) {
     }
     printf("[CPU] N=256 round-trip max error: %.2e  %s\n", max_err_256, max_err_256 < 1e-12 ? "PASS" : "FAIL");
 
-    /* --- cexp vs sin/cos benchmark --- */
+    /* --- exp vs sin/cos benchmark --- */
     std::complex<double> *orig = (std::complex<double>*)malloc(MAXN * sizeof(std::complex<double>));
     for (int i = 0; i < MAXN; i++) orig[i] = a_orig[i];
 
     clock_t t0, t1;
-    double cexp_ms, sincos_ms;
+    double exp_ms, sincos_ms;
 
-    /* cexp variant */
+    /* exp variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
     t0 = clock(); split_radix_fft(a, NULL, MAXN); t1 = clock();
-    cexp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
-    printf("  %-20s %10.3f ms\n", "cexp twiddle", cexp_ms);
+    exp_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
+    printf("  %-20s %10.3f ms\n", "exp twiddle", exp_ms);
 
     /* sin/cos variant */
     memcpy(a, orig, MAXN * sizeof(std::complex<double>));
     t0 = clock(); split_radix_fft_sincos(a, MAXN); t1 = clock();
     sincos_ms = 1000.0 * (t1 - t0) / CLOCKS_PER_SEC;
     printf("  %-20s %10.3f ms\n", "sin/cos twiddle", sincos_ms);
-    printf("  -> sin/cos speedup: %5.1fx\n", cexp_ms / sincos_ms);
+    printf("  -> sin/cos speedup: %5.1fx\n", exp_ms / sincos_ms);
 
     free(a); free(a_orig); free(s); free(s_orig); free(orig);
     return 0;
@@ -303,14 +303,14 @@ LD_LIBRARY_PATH=/opt/rocm/core-10.1/lib ./fft_gpu_test
 - `split_radix_fft_cpu.cpp` — split-radix DIT butterfly: N/2 (even) + two N/4 (stride-4 odd: 1,5,9... and 3,7,11...); CUDA-compatible `.cpp` (uses `std::complex`)
 - IFFT = `conjugate(FFT(conjugate(x)))/N` — no duplicate code
 - `fft_compare_all_n_sweep.cpp` — sweeps N=1…16384, tests split-radix + sincos round-trip
-- `fft_compare_all.cu` — unified CPU+GPU test at N=16384 + cexp vs sin/cos benchmark
+- `fft_compare_all.cu` — unified CPU+GPU test at N=16384 + exp vs sin/cos benchmark
 
 ## Gotchas
 
 - **hipFFT does NOT divide by N on inverse** — must do `d_in[i] /= N` manually after BACKWARD (see `fft_gpu_test.cu:37-39`)
 - GPU uses `float2` internally, not `double`; N=16384 float error ~2.7e-5
 - IFFT in `fft_gpu_test.cu` reads from `d_out` (FFT output), not `d_in`
-- Benchmarks show sin/cos + `-O3 -march=native -ffast-math` ≈ 4× faster than `cexp` at `-O0`
+- Benchmarks show sin/cos + `-O3 -march=native -ffast-math` ≈ 4× faster than `exp` at `-O0`
 - No Makefile or test framework — everything is a single `g++`/`hipcc` command
 ```
 
