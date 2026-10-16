@@ -29,17 +29,17 @@ void gpu_fft_test(int N) {
     clock_t t0 = clock();
     hipfftExecC2C(plan, d_in, d_out, HIPFFT_FORWARD);
     hipDeviceSynchronize();
-    hipfftExecC2C(plan, d_in, d_out, HIPFFT_BACKWARD);
+    hipfftExecC2C(plan, d_out, d_in, HIPFFT_BACKWARD);
     hipDeviceSynchronize();
     clock_t t1 = clock();
 
     for (int i = 0; i < N; i++) {
-        d_out[i].x /= (float)N;
-        d_out[i].y /= (float)N;
+        d_in[i].x /= (float)N;
+        d_in[i].y /= (float)N;
     }
 
     hipfftComplex *h_ifft = (hipfftComplex*)malloc(N * sizeof(hipfftComplex));
-    hipMemcpy(h_ifft, d_out, N * sizeof(hipfftComplex), hipMemcpyDeviceToHost);
+    hipMemcpy(h_ifft, d_in, N * sizeof(hipfftComplex), hipMemcpyDeviceToHost);
 
     double max_err = 0;
     for (int i = 0; i < N; i++) {
@@ -58,8 +58,4 @@ void gpu_fft_test(int N) {
     hipfftDestroy(plan);
 }
 
-int main(void) {
-    printf("ROCm hipFFT N=16384 comparison:\n");
-    gpu_fft_test(16384);
-    return 0;
-}
+
